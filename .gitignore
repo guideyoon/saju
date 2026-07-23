@@ -1,6 +1,7 @@
 .next
 node_modules
 out
+dist
 .env*
 *.log
 .openai/site-build.tar.gz
