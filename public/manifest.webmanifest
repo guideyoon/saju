@@ -1,0 +1,18 @@
+{
+  "name": "명운서재",
+  "short_name": "명운서재",
+  "description": "내 운명을 읽고, 다음 선택을 설계하다.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fbf8f1",
+  "theme_color": "#173b36",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

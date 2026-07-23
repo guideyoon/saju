@@ -1,0 +1,386 @@
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap");
+
+:root {
+  --ink: #182825;
+  --green: #173b36;
+  --green-2: #24574f;
+  --cream: #f5f0e6;
+  --paper: #fbf8f1;
+  --red: #a84335;
+  --gold: #b88a4b;
+  --line: #dcd4c5;
+  --muted: #746f67;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: "Noto Sans KR", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, textarea, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: 78px;
+  padding: 0 clamp(24px, 5vw, 80px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(251, 248, 241, .92);
+  border-bottom: 1px solid rgba(220, 212, 197, .7);
+  backdrop-filter: blur(16px);
+}
+.brand { display: flex; align-items: center; gap: 12px; border: 0; background: none; cursor: pointer; }
+.brand-mark {
+  width: 42px; height: 42px; display: grid; place-items: center;
+  color: var(--paper); background: var(--green); border-radius: 50% 50% 46% 50%;
+  font-family: "Gowun Batang", serif; font-size: 21px;
+}
+.brand strong { display: block; font-family: "Gowun Batang", serif; font-size: 20px; letter-spacing: .08em; }
+.brand small { display: block; margin-top: 2px; color: var(--muted); font-size: 8px; letter-spacing: .16em; }
+.nav { display: flex; align-items: center; gap: 30px; font-size: 13px; font-weight: 600; }
+.nav button { padding: 8px 0; border: 0; background: none; cursor: pointer; }
+.nav a:hover, .nav button:hover { color: var(--red); }
+.menu-button { display: none; border: 0; background: none; font-size: 13px; }
+.progress-wrap { height: 2px; background: #ebe4d7; }
+.progress { height: 100%; background: var(--red); transition: width .5s ease; }
+
+.hero {
+  min-height: 640px;
+  padding: 90px clamp(24px, 8vw, 130px) 80px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(280px, .5fr);
+  gap: 80px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 82% 35%, rgba(184, 138, 75, .12) 0 1px, transparent 2px) 0 0/20px 20px,
+    linear-gradient(135deg, #f9f5ec, #efe7d9);
+}
+.hero::after {
+  content: "命運";
+  position: absolute; right: -25px; bottom: -80px;
+  font: 700 260px/1 "Gowun Batang", serif; color: rgba(23, 59, 54, .035);
+}
+.kicker { margin: 0 0 20px; color: var(--red); font-size: 12px; font-weight: 700; letter-spacing: .17em; text-transform: uppercase; }
+.hero h1, .flow-intro h1, .result-top h1, .loading-section h1, .section-heading h1 {
+  margin: 0; font-family: "Gowun Batang", serif; font-weight: 700; line-height: 1.25;
+}
+.hero h1 { font-size: clamp(43px, 5.2vw, 74px); letter-spacing: -.05em; }
+.hero h1 em { color: var(--red); font-style: normal; position: relative; }
+.hero h1 em::after { content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 7px; background: rgba(168, 67, 53, .12); }
+.hero-description { max-width: 590px; margin: 28px 0; color: #5e625e; font-size: 17px; line-height: 1.9; }
+.trust-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.trust-row span { padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 11px; background: rgba(255,255,255,.45); }
+.hero-seal {
+  position: relative; z-index: 1; aspect-ratio: 1; max-width: 330px; width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px solid rgba(23,59,54,.25); border-radius: 50%;
+  background: rgba(251,248,241,.72); box-shadow: 0 30px 80px rgba(40, 35, 25, .1);
+}
+.hero-seal::before, .hero-seal::after { content:""; position:absolute; inset:14px; border:1px solid rgba(168,67,53,.22); border-radius:50%; }
+.hero-seal::after { inset:28px; border-style:dashed; }
+.hero-seal span { color: var(--red); font-family: "Gowun Batang", serif; letter-spacing: .35em; }
+.hero-seal strong { margin: 5px 0; font: 700 88px/1 "Gowun Batang", serif; color: var(--green); }
+.hero-seal small { color: var(--muted); }
+
+.topic-section { max-width: 1240px; margin: 0 auto; padding: 110px 24px 130px; }
+.section-heading { margin-bottom: 44px; }
+.section-heading > span { color: var(--red); font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.section-heading h2, .section-heading h1 { margin: 12px 0; font: 700 clamp(30px, 4vw, 46px)/1.35 "Gowun Batang", serif; letter-spacing: -.04em; }
+.section-heading p { color: var(--muted); line-height: 1.7; }
+.section-heading.center { text-align: center; }
+.topic-grid { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.topic-card {
+  min-height: 360px; padding: 26px; display: flex; flex-direction: column; text-align: left;
+  background: transparent; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  cursor: pointer; transition: .3s ease; position: relative;
+}
+.topic-card:hover { background: var(--green); color: white; transform: translateY(-7px); box-shadow: 0 20px 45px rgba(23,59,54,.15); }
+.topic-index { align-self: flex-end; color: var(--muted); font-size: 10px; }
+.topic-icon { margin: 34px 0; font: 700 44px "Gowun Batang", serif; color: var(--red); }
+.topic-card small { margin-bottom: 10px; color: var(--gold); font-weight: 700; font-size: 11px; }
+.topic-card strong { font: 700 22px/1.5 "Gowun Batang", serif; }
+.topic-card p { color: var(--muted); font-size: 13px; line-height: 1.7; }
+.topic-card:hover p, .topic-card:hover .topic-index { color: rgba(255,255,255,.6); }
+.card-link { margin-top: auto; font-size: 12px; font-weight: 700; color: var(--red); }
+.topic-card:hover .card-link { color: #e9c491; }
+.method-section {
+  padding: 100px clamp(24px, 9vw, 140px);
+  display: grid; grid-template-columns: .8fr 1.2fr; gap: 90px;
+  color: white; background: var(--green);
+}
+.kicker.light { color: #d7b982; }
+.method-section h2 { margin: 0; font: 700 clamp(36px, 4vw, 58px)/1.4 "Gowun Batang", serif; }
+.principles article { padding: 28px 0; display: flex; gap: 24px; border-bottom: 1px solid rgba(255,255,255,.15); }
+.principles article > span { color: #d7b982; font: 700 24px "Gowun Batang", serif; }
+.principles strong { font: 700 20px "Gowun Batang", serif; }
+.principles p { margin: 8px 0 0; color: rgba(255,255,255,.55); font-size: 13px; line-height: 1.7; }
+
+.flow-section, .product-section, .result-section { max-width: 1180px; min-height: 750px; margin: 0 auto; padding: 52px 24px 110px; }
+.back-button { padding: 10px 0; border: 0; background: transparent; color: var(--muted); font-size: 12px; cursor: pointer; }
+.flow-layout { margin-top: 46px; display: grid; grid-template-columns: .85fr 1.15fr; gap: 90px; }
+.flow-intro { position: sticky; top: 150px; align-self: start; }
+.teacher-chip { display: inline-block; margin-bottom: 24px; padding: 8px 13px; border-radius: 3px; color: var(--green); background: #e4ebe6; font-size: 11px; font-weight: 700; }
+.flow-intro h1 { font-size: clamp(36px, 4vw, 55px); }
+.flow-intro > p { color: var(--muted); line-height: 1.8; }
+.privacy-note { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.profile-form { padding: 38px; border: 1px solid var(--line); background: white; box-shadow: 0 14px 50px rgba(51,41,28,.05); }
+.profile-form label, .review-modal label { display: block; margin-bottom: 25px; color: var(--ink); font-size: 13px; font-weight: 700; }
+.profile-form label > span { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.profile-form label small, .review-modal label small { color: var(--muted); font-weight: 400; }
+input, textarea, select {
+  width: 100%; padding: 14px 15px; color: var(--ink); background: #faf8f3;
+  border: 1px solid #dcd7cc; border-radius: 2px; outline: none; transition: .2s;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23,59,54,.08); }
+textarea { min-height: 120px; resize: vertical; line-height: 1.7; }
+.form-row { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; margin-bottom: 25px; }
+fieldset { margin: 0; padding: 0; border: 0; }
+legend { margin-bottom: 10px; font-size: 13px; font-weight: 700; }
+.segment { display: flex; }
+.segment button { flex: 1; padding: 13px 5px; border: 1px solid #dcd7cc; background: #faf8f3; font-size: 11px; cursor: pointer; }
+.segment button + button { border-left: 0; }
+.segment button.active { color: white; background: var(--green); border-color: var(--green); }
+.primary-button {
+  width: 100%; padding: 17px 24px; border: 0; border-radius: 2px;
+  color: white; background: var(--green); font-weight: 700; cursor: pointer;
+  transition: .2s; box-shadow: 0 8px 24px rgba(23,59,54,.16);
+}
+.primary-button:hover { background: var(--green-2); transform: translateY(-1px); }
+.primary-button.wide { max-width: 480px; display: block; margin: 34px auto 0; }
+.text-button { display: block; margin: 18px auto; border: 0; background: none; color: var(--muted); text-decoration: underline; cursor: pointer; }
+
+.result-section { max-width: 980px; }
+.result-top { padding: 55px 0 35px; display: flex; align-items: center; justify-content: space-between; gap: 50px; border-bottom: 1px solid var(--line); }
+.result-top h1 { font-size: clamp(40px, 5vw, 62px); }
+.result-top > div > p:last-child { color: var(--muted); }
+.score-ring {
+  flex: 0 0 130px; width: 130px; height: 130px; display: grid; place-content: center; text-align: center;
+  border: 1px solid var(--red); border-radius: 50%; box-shadow: inset 0 0 0 8px var(--paper), inset 0 0 0 9px rgba(168,67,53,.18);
+}
+.score-ring strong { color: var(--red); font: 700 42px/1 "Gowun Batang", serif; }
+.score-ring span { margin-top: 7px; color: var(--muted); font-size: 10px; }
+.score-ring.large { width: 150px; height: 150px; flex-basis: 150px; }
+.keyword-row { padding: 24px 0; display: flex; gap: 10px; }
+.keyword-row span { padding: 8px 13px; border-radius: 999px; background: #e6ece8; color: var(--green); font-size: 12px; }
+.reading-card { position: relative; margin: 28px 0; padding: 44px; border: 1px solid var(--line); background: white; }
+.reading-card small { color: var(--red); font-weight: 700; }
+.reading-card h2 { margin: 13px 0 20px; font: 700 28px/1.5 "Gowun Batang", serif; }
+.reading-card p { color: #5e625e; line-height: 2; }
+.reading-card.accent { border-top: 3px solid var(--red); }
+.chapter { position: absolute; right: 28px; top: 24px; color: #e9e4da; font: 700 45px "Gowun Batang", serif; }
+.locked-reading { position: relative; min-height: 350px; overflow: hidden; }
+.locked-card { margin-bottom: 12px; padding: 25px 34px; border: 1px solid var(--line); background: white; filter: blur(2.2px); opacity: .55; }
+.locked-card span { margin-right: 20px; color: var(--red); font-family: "Gowun Batang", serif; }
+.locked-card p { margin: 6px 0 0 42px; color: var(--muted); font-size: 12px; }
+.fade-lock { position: absolute; inset: 45px 0 0; display: grid; place-content: center; text-align: center; background: linear-gradient(transparent, var(--paper) 30%); }
+.fade-lock > span { color: var(--gold); font-size: 30px; }
+.fade-lock strong { font: 700 25px/1.5 "Gowun Batang", serif; }
+.fade-lock p { color: var(--muted); font-size: 12px; }
+.action-quote { padding: 34px; text-align: center; color: white; background: var(--green); }
+.action-quote small { color: #d7b982; }
+.action-quote blockquote { margin: 15px auto 0; max-width: 700px; font: 700 22px/1.7 "Gowun Batang", serif; }
+
+.product-section { max-width: 1120px; }
+.product-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.product-card {
+  position: relative; padding: 34px 28px; text-align: left; border: 1px solid var(--line);
+  background: white; cursor: pointer; transition: .25s;
+}
+.product-card:hover { transform: translateY(-4px); box-shadow: 0 14px 35px rgba(30,45,40,.08); }
+.product-card.selected { border: 2px solid var(--green); background: #f5f8f5; }
+.radio-dot { position: absolute; right: 22px; top: 22px; width: 18px; height: 18px; border: 1px solid var(--line); border-radius: 50%; }
+.selected .radio-dot { border: 5px solid var(--green); }
+.popular-badge { position: absolute; top: -12px; left: 20px; padding: 6px 11px; color: white; background: var(--red); font-size: 9px; font-weight: 700; }
+.product-card h2 { margin: 12px 0 8px; font: 700 22px "Gowun Batang", serif; }
+.product-card > p { min-height: 42px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.price { display: block; margin: 28px 0 22px; color: var(--green); font: 700 29px "Gowun Batang", serif; }
+.product-card ul { margin: 0; padding: 20px 0 0; border-top: 1px solid var(--line); list-style: none; }
+.product-card li { margin: 9px 0; color: #5d645f; font-size: 12px; }
+.checkout-card { max-width: 720px; margin: 35px auto 0; padding: 32px; background: white; border: 1px solid var(--line); }
+.coupon-area label { display: block; margin-bottom: 9px; font-size: 12px; font-weight: 700; }
+.coupon-area > div { display: flex; }
+.coupon-area input { flex: 1; }
+.coupon-area button { padding: 0 22px; border: 0; color: white; background: var(--green); cursor: pointer; }
+.coupon-area small { display: block; margin-top: 7px; }
+.success { color: #28745a; }
+.hint { color: var(--red); }
+.price-summary { margin: 25px 0; padding: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.price-summary span { margin: 8px 0; display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.price-summary .total { margin-top: 18px; color: var(--ink); font-size: 15px; }
+.price-summary .total strong { font-size: 20px; color: var(--red); }
+.kakao-button { width: 100%; padding: 16px; border: 0; border-radius: 4px; background: #fee500; color: #171717; font-weight: 700; cursor: pointer; }
+.kakao-button span { margin-right: 12px; font-size: 11px; font-weight: 800; }
+.demo-notice { text-align: center; color: var(--muted); font-size: 10px; }
+.ai-disclosure { margin-top: 22px; padding: 16px; color: var(--muted); background: #f4f1ea; font-size: 10px; line-height: 1.7; }
+
+.loading-section { min-height: 760px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.orbit { position: relative; width: 170px; height: 170px; margin-bottom: 40px; border: 1px dashed rgba(168,67,53,.35); border-radius: 50%; animation: spin 18s linear infinite; }
+.orbit strong { position: absolute; inset: 47px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--green); font: 700 35px "Gowun Batang", serif; animation: reverse-spin 18s linear infinite; }
+.orbit span { position: absolute; color: var(--red); font: 700 14px "Gowun Batang", serif; }
+.orbit span:nth-child(1) { left: 75px; top: -10px; }.orbit span:nth-child(2) { right: 1px; top: 44px; }
+.orbit span:nth-child(3) { right: 20px; bottom: 10px; }.orbit span:nth-child(4) { left: 17px; bottom: 12px; }
+.orbit span:nth-child(5) { left: -5px; top: 47px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes reverse-spin { to { transform: rotate(-360deg); } }
+.loading-section h1 { font-size: clamp(35px, 4vw, 52px); }
+.loading-list { width: min(420px, 90vw); margin-top: 35px; text-align: left; }
+.loading-list div { padding: 11px 0; color: #aaa69e; font-size: 12px; border-bottom: 1px solid #ebe5d9; transition: .4s; }
+.loading-list div.done { color: var(--ink); }
+.loading-list span { display: inline-block; width: 24px; color: var(--red); font-weight: 700; }
+
+.result-label { margin-top: 32px; padding: 11px; text-align: center; color: #d7b982; background: var(--green); font-size: 9px; letter-spacing: .15em; }
+.summary-grid { display: grid; grid-template-columns: repeat(3,1fr); margin: 30px 0; border: 1px solid var(--line); background: white; }
+.summary-grid div { padding: 25px; border-right: 1px solid var(--line); }
+.summary-grid div:last-child { border: 0; }
+.summary-grid small { display: block; margin-bottom: 10px; color: var(--muted); font-size: 10px; }
+.summary-grid strong { font: 700 17px/1.5 "Gowun Batang", serif; }
+.timeline-section { padding: 70px 0; }
+.timeline-section > h2 { font: 700 34px/1.5 "Gowun Batang", serif; }
+.timeline { display: grid; grid-template-columns: repeat(3,1fr); margin-top: 35px; border-top: 1px solid var(--ink); }
+.timeline article { position: relative; padding: 34px 25px; border-right: 1px solid var(--line); }
+.timeline article::before { content:""; position:absolute; top:-5px; left:26px; width:9px; height:9px; border-radius:50%; background:var(--red); }
+.timeline article > span { color: #ddd6c9; font: 700 35px "Gowun Batang", serif; }
+.timeline small, .timeline strong { display:block; }
+.timeline small { margin-top: 20px; color: var(--red); font-size: 10px; }
+.timeline strong { margin: 8px 0; font: 700 19px "Gowun Batang", serif; }
+.timeline p { color: var(--muted); font-size: 12px; line-height: 1.7; }
+.do-dont-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.do-dont-grid article { padding: 38px; color: white; }
+.do-card { background: var(--green); }.dont-card { background: #7c3e35; }
+.do-dont-grid article > span { color: #e5c997; font-size: 10px; font-weight: 700; }
+.do-dont-grid h2 { font: 700 23px/1.5 "Gowun Batang", serif; }
+.do-dont-grid ul { padding-left: 20px; color: rgba(255,255,255,.7); font-size: 12px; line-height: 1.8; }
+.final-quote { margin: 55px 0; padding: 60px 40px; text-align: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.final-quote > span { color: var(--red); font-size: 10px; font-weight: 700; letter-spacing: .12em; }
+.final-quote blockquote { max-width: 720px; margin: 20px auto; font: 700 29px/1.7 "Gowun Batang", serif; }
+.final-quote p { color: var(--muted); font-size: 10px; }
+.result-actions { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.result-actions button { padding: 15px 8px; border: 1px solid var(--line); background: white; font-size: 11px; cursor: pointer; }
+.result-actions button:hover { color: white; background: var(--green); }
+.toast { margin-top: 18px; padding: 13px; text-align: center; color: #286049; background: #e0eee6; font-size: 12px; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 20px; background: rgba(16,29,26,.65); }
+.review-modal { position: relative; width: min(500px, 100%); padding: 40px; background: var(--paper); box-shadow: 0 30px 90px rgba(0,0,0,.25); }
+.review-modal h2 { font: 700 28px "Gowun Batang", serif; }
+.review-modal select, .review-modal textarea { margin-top: 9px; }
+.modal-close { position: absolute; right: 20px; top: 15px; border: 0; background: none; font-size: 26px; cursor: pointer; }
+
+footer { padding: 55px clamp(24px, 7vw, 110px); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 30px; color: rgba(255,255,255,.65); background: #102d29; }
+.footer-brand { display: flex; align-items: center; gap: 14px; }
+.footer-brand strong { color: white; font-family: "Gowun Batang", serif; font-size: 19px; }
+.footer-brand p { margin: 4px 0 0; font-size: 10px; }
+.footer-links { display: flex; gap: 22px; font-size: 10px; }
+.copyright { grid-column: 1/-1; padding-top: 25px; border-top: 1px solid rgba(255,255,255,.1); font-size: 9px; }
+
+.admin-shell { min-height: 100vh; display: grid; grid-template-columns: 240px 1fr; background: #f2f1ec; }
+.admin-sidebar { position: sticky; top: 0; height: 100vh; padding: 30px 24px; display: flex; flex-direction: column; color: white; background: var(--green); }
+.admin-sidebar .brand small { color: #c4d1ce; }
+.admin-sidebar nav { margin-top: 55px; display: grid; gap: 7px; }
+.admin-sidebar nav button { padding: 13px 15px; text-align: left; border: 0; border-radius: 4px; color: rgba(255,255,255,.58); background: transparent; cursor: pointer; font-size: 12px; }
+.admin-sidebar nav button.active { color: white; background: rgba(255,255,255,.1); }
+.admin-back { margin-top: auto; font-size: 11px; color: rgba(255,255,255,.6); }
+.admin-main { padding: 40px clamp(25px, 5vw, 70px) 80px; overflow: hidden; }
+.admin-main > header { display: flex; justify-content: space-between; align-items: center; }
+.admin-main header p { margin: 0; color: var(--muted); font-size: 10px; }
+.admin-main header h1 { margin: 7px 0; font: 700 32px "Gowun Batang", serif; }
+.admin-user { padding: 9px 13px; border: 1px solid var(--line); border-radius: 99px; font-size: 10px; }
+.metric-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; margin: 30px 0; }
+.metric-grid article { padding: 24px; background: white; border: 1px solid #e4e0d7; }
+.metric-grid small, .metric-grid span { display:block; color:var(--muted); font-size:9px; }
+.metric-grid strong { display: block; margin: 12px 0 7px; font: 700 26px "Gowun Batang", serif; }
+.metric-grid span { color: #52806e; }
+.admin-grid { display: grid; grid-template-columns: 1.3fr .7fr; gap: 13px; }
+.admin-panel { padding: 28px; border: 1px solid #e4e0d7; background: white; }
+.panel-heading { display: flex; align-items: flex-start; justify-content: space-between; }
+.panel-heading small, .panel-heading > span { color: var(--muted); font-size: 9px; }
+.panel-heading h2 { margin: 6px 0; font: 700 19px "Gowun Batang", serif; }
+.bars { height: 200px; padding-top: 25px; display:flex; align-items:flex-end; justify-content:space-around; border-bottom:1px solid var(--line); }
+.bars div { width: 9%; height: 100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:8px; }
+.bars div span { width:100%; max-width:28px; background:var(--green); border-radius:3px 3px 0 0; }
+.bars small { color: var(--muted); font-size:8px; }
+.sales-list { margin-top: 25px; }
+.sales-list > div { padding: 13px 0; display:grid; grid-template-columns:12px 1fr auto; align-items:center; gap:10px; border-bottom:1px solid #eeeae2; }
+.sales-dot { width:8px; height:8px; border-radius:50%; }.sales-dot.focus{background:var(--green)}.sales-dot.life{background:var(--red)}.sales-dot.question{background:var(--gold)}
+.sales-list p { margin:0; font-size:11px; }.sales-list p small { display:block; color:var(--muted); }.sales-list strong{font-size:11px;}
+.table-panel, .review-panel { margin-top: 13px; overflow-x: auto; }
+.data-table { min-width: 650px; margin-top: 20px; }
+.table-head, .table-row { display:grid; grid-template-columns:.7fr 1.4fr 1.2fr .6fr .7fr; gap:12px; align-items:center; padding:12px 8px; border-bottom:1px solid #eeeae2; font-size:10px; }
+.table-head { color: var(--muted); }
+.admin-review { padding:15px 0; border-bottom:1px solid var(--line); }
+.admin-review > div { display:flex; gap:12px; align-items:center; }
+.admin-review span { color:var(--muted); font-size:9px; }
+.admin-review p { margin:8px 0 0; font-size:11px; }
+.empty-state { padding:30px; text-align:center; color:var(--muted); font-size:11px; background:#f7f5f0; }
+
+@media (max-width: 900px) {
+  .nav { display: none; position: absolute; left: 0; right: 0; top: 78px; padding: 24px; flex-direction: column; align-items: stretch; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .nav.open { display: flex; }
+  .menu-button { display: block; }
+  .hero { grid-template-columns: 1fr; padding-top: 70px; }
+  .hero-seal { max-width: 260px; margin: 0 auto; }
+  .topic-grid { grid-template-columns: 1fr 1fr; }
+  .method-section, .flow-layout { grid-template-columns: 1fr; gap: 45px; }
+  .flow-intro { position: static; }
+  .product-grid { grid-template-columns: 1fr; }
+  .product-card > p { min-height: 0; }
+  .admin-shell { grid-template-columns: 1fr; }
+  .admin-sidebar { position: static; height: auto; flex-direction: row; align-items: center; justify-content: space-between; }
+  .admin-sidebar nav { display: none; }
+  .admin-back { margin: 0; }
+  .metric-grid { grid-template-columns: 1fr 1fr; }
+  .admin-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .site-header { height: 66px; padding: 0 18px; }
+  .nav { top: 66px; }
+  .brand-mark { width: 37px; height: 37px; }
+  .hero { min-height: auto; padding: 60px 22px 70px; gap: 55px; }
+  .hero h1 { font-size: 42px; }
+  .hero-description { font-size: 14px; }
+  .hero-seal { max-width: 220px; }
+  .hero-seal strong { font-size: 65px; }
+  .topic-section { padding-top: 75px; }
+  .topic-grid { grid-template-columns: 1fr; }
+  .topic-card { min-height: 310px; }
+  .method-section { padding: 75px 24px; }
+  .flow-section, .product-section, .result-section { padding: 30px 18px 80px; }
+  .flow-layout { margin-top: 25px; }
+  .profile-form { padding: 25px 18px; }
+  .form-row { grid-template-columns: 1fr; }
+  .result-top { align-items: flex-start; gap: 20px; }
+  .result-top h1 { font-size: 36px; }
+  .score-ring, .score-ring.large { width: 98px; height: 98px; flex-basis: 98px; }
+  .score-ring strong { font-size: 31px; }
+  .reading-card { padding: 30px 22px; }
+  .reading-card h2 { font-size: 23px; }
+  .summary-grid, .timeline, .do-dont-grid { grid-template-columns: 1fr; }
+  .summary-grid div { border-right: 0; border-bottom: 1px solid var(--line); }
+  .timeline article { border-right: 0; border-bottom: 1px solid var(--line); }
+  .result-actions { grid-template-columns: 1fr 1fr; }
+  .final-quote { padding: 45px 15px; }
+  .final-quote blockquote { font-size: 23px; }
+  footer { grid-template-columns: 1fr; }
+  .footer-links { flex-wrap: wrap; }
+  .metric-grid { grid-template-columns: 1fr; }
+  .admin-sidebar .brand span:last-child { display:none; }
+  .admin-main { padding: 25px 15px 60px; }
+}
+
+@media print {
+  .site-header, .progress-wrap, footer, .result-actions, .result-label { display:none !important; }
+  body { background:white; }
+  .result-section { padding:0; }
+  .reading-card, .summary-grid { break-inside:avoid; }
+}

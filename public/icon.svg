@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="120" fill="#173b36"/>
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#d9bd86" stroke-width="8"/>
+  <text x="256" y="325" text-anchor="middle" fill="#fbf8f1" font-size="210" font-family="serif">命</text>
+</svg>
