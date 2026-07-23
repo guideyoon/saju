@@ -7,15 +7,19 @@
     "dev": "vinext dev",
     "build": "vinext build && node scripts/postbuild.mjs",
     "start": "vinext start",
-    "check": "vinext check"
+    "check": "vinext check",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.check.json --noEmit"
   },
   "dependencies": {
+    "lunar-typescript": "^1.8.6",
     "next": "^16.2.11",
     "postcss": "^8.5.22",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-server-dom-webpack": "^19.2.8",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.13.0",
@@ -25,7 +29,8 @@
     "@vitejs/plugin-rsc": "^0.5.30",
     "typescript": "^5.7.3",
     "vinext": "^1.0.0-beta.3",
-    "vite": "^8.1.5"
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   },
   "overrides": {
     "postcss": "^8.5.22",

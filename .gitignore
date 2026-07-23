@@ -1,7 +1,11 @@
 .next
+.vinext
 node_modules
 out
 dist
 .env*
 *.log
+*.tsbuildinfo
+.dev-server.log
+.dev-server-error.log
 .openai/site-build.tar.gz

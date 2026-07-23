@@ -1,4 +1,4 @@
-const CACHE = "myeongun-v1";
+const CACHE = "myeongun-v2";
 const ASSETS = ["/", "/manifest.webmanifest", "/icon.svg"];
 
 self.addEventListener("install", (event) => {
@@ -17,9 +17,12 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const url = new URL(event.request.url);
+  if (url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
   event.respondWith(
     fetch(event.request)
       .then((response) => {
+        if (!response.ok || response.type === "opaque") return response;
         const copy = response.clone();
         caches.open(CACHE).then((cache) => cache.put(event.request, copy));
         return response;
