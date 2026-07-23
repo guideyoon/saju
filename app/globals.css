@@ -575,6 +575,43 @@ footer { padding: 55px clamp(24px, 7vw, 110px); display: grid; grid-template-col
 .legal-page { max-width: 800px; }
 .legal-page > h2 { margin-top: 38px; padding-top: 28px; border-top: 1px solid var(--line); }
 
+.payment-status-page {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.payment-status-page .result-actions { margin-top: 24px; }
+
+.payment-status-page .result-actions a {
+  display: inline-flex;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: white;
+  text-decoration: none;
+}
+
+.consent-label span {
+  display: inline;
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.consent-label a {
+  color: var(--green);
+  text-underline-offset: 3px;
+}
+
+.checkout-consent {
+  margin: 18px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
 @media (max-width: 600px) {
   .content-header { height: 66px; padding: 0 17px; }
   .content-header > a:last-child { font-size: 9px; }

@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { enhanceReportWithOpenAI } from "../../../lib/saju/ai";
-import { calculateSaju } from "../../../lib/saju/engine";
-import { createRuleBasedReport } from "../../../lib/saju/interpretation";
+import { generatePreview } from "../../../lib/saju/generate";
 import { birthInputSchema } from "../../../lib/saju/schema";
 
 export const dynamic = "force-dynamic";
@@ -40,28 +38,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const input = parsed.data;
-    const chart = calculateSaju(input);
-    const fallback = createRuleBasedReport(input, chart);
-
-    let enhanced: Awaited<ReturnType<typeof enhanceReportWithOpenAI>>;
-    try {
-      enhanced = await enhanceReportWithOpenAI({ input, chart, fallback });
-    } catch (error) {
-      console.error("AI enhancement failed; using rule engine.", error);
-      enhanced = { report: fallback };
-    }
-
     return NextResponse.json(
-      {
-        chart,
-        report: enhanced.report,
-        generatedAt: new Date().toISOString(),
-        interpretationSource: enhanced.model
-          ? "openai-assisted"
-          : "rule-engine",
-        model: enhanced.model,
-      },
+      generatePreview(parsed.data),
       {
         headers: {
           "Cache-Control": "no-store, private",

@@ -115,4 +115,28 @@ export interface ReadingResponse {
   generatedAt: string;
   interpretationSource: "rule-engine" | "openai-assisted";
   model?: string;
+  payment?: {
+    orderId: string;
+    amount: number;
+    method: string;
+    approvedAt: string;
+    mode: "test" | "toss";
+  };
+}
+
+export interface ReadingPreview {
+  score: number;
+  scoreLabel: string;
+  keywords: string[];
+  summary: string;
+  preview: string;
+  nature: ReadingSection;
+  coreMessage: string;
+}
+
+export interface ReadingPreviewResponse {
+  chart: SajuChart;
+  preview: ReadingPreview;
+  generatedAt: string;
+  interpretationSource: "rule-engine";
 }

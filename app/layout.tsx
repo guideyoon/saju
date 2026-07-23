@@ -1,8 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "https://myeongun-seojae-mvp.guideyoon.chatgpt.site";
+const isIndexable = process.env.SITE_INDEXABLE === "true";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://myeongun-seojae-mvp.guideyoon.chatgpt.site"),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "명운서재 | 근거를 보여주는 사주 해석",
     template: "%s | 명운서재",
@@ -18,8 +23,8 @@ export const metadata: Metadata = {
     locale: "ko_KR",
   },
   robots: {
-    index: false,
-    follow: false,
+    index: isIndexable,
+    follow: isIndexable,
   },
 };
 

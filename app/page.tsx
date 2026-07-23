@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import type {
   BirthInput,
+  ReadingPreviewResponse,
   ReadingResponse,
   TopicId,
 } from "../lib/saju/types";
@@ -18,7 +19,7 @@ type Topic = {
 };
 
 type Product = {
-  id: "question" | "focus" | "life";
+  id: "focus";
   name: string;
   price: number;
   description: string;
@@ -65,26 +66,12 @@ const topics: Topic[] = [
 
 const products: Product[] = [
   {
-    id: "question",
-    name: "한 가지 질문",
-    price: 4900,
-    description: "지금 가장 답답한 한 가지에 집중합니다.",
-    features: ["원국 기반 핵심 원인", "3개월 흐름", "행동 조언", "1년 보관"],
-  },
-  {
     id: "focus",
-    name: "집중 사주 상담",
+    name: "상세 사주 리포트",
     price: 14900,
-    description: "원국과 대운, 앞으로 6개월을 함께 읽습니다.",
-    features: ["사주 원국·오행", "현재 대운·세운", "6개월 월별 흐름", "PDF 저장"],
-    badge: "가장 많이 선택",
-  },
-  {
-    id: "life",
-    name: "종합 인생 리포트",
-    price: 29900,
-    description: "연애·재물·직업과 1년의 큰 흐름을 살핍니다.",
-    features: ["전 분야 종합 분석", "대운·세운·월운", "추가 질문 1회", "영구 보관"],
+    description: "원국과 대운, 앞으로 6개월의 행동 방향을 한 번에 읽습니다.",
+    features: ["사주 원국·오행·십성", "현재 대운·세운", "6개월 월별 흐름", "PDF·기기 저장"],
+    badge: "단일 상품",
   },
 ];
 
@@ -114,17 +101,16 @@ export default function Home() {
   const [step, setStep] = useState<Step>("topics");
   const [topic, setTopic] = useState<Topic>(topics[0]);
   const [profile, setProfile] = useState(initialProfile);
+  const [preview, setPreview] = useState<ReadingPreviewResponse | null>(null);
   const [reading, setReading] = useState<ReadingResponse | null>(null);
   const [error, setError] = useState("");
   const [loadingIndex, setLoadingIndex] = useState(0);
-  const [product, setProduct] = useState(products[1]);
-  const [coupon, setCoupon] = useState("");
-  const [couponApplied, setCouponApplied] = useState(false);
+  const [product, setProduct] = useState(products[0]);
+  const [paymentBusy, setPaymentBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const discount = couponApplied ? Math.floor(product.price * 0.2) : 0;
-  const finalPrice = product.price - discount;
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
+  const [paymentAgreed, setPaymentAgreed] = useState(false);
 
   useEffect(() => {
     if (step !== "loading") return;
@@ -141,6 +127,26 @@ export default function Home() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
+
+    try {
+      const unlocked = sessionStorage.getItem("myeongun-unlocked-reading");
+      if (!unlocked) return;
+      const recovered = JSON.parse(unlocked) as {
+        input: BirthInput;
+        reading: ReadingResponse;
+      };
+      const recoveredTopic =
+        topics.find((item) => item.id === recovered.input.topic) || topics[0];
+      const { topic: _topic, ...rest } = recovered.input;
+      setTopic(recoveredTopic);
+      setProfile(rest);
+      setReading(recovered.reading);
+      setStep("result");
+      sessionStorage.removeItem("myeongun-unlocked-reading");
+      sessionStorage.removeItem("myeongun-pending-payment");
+    } catch {
+      sessionStorage.removeItem("myeongun-unlocked-reading");
+    }
   }, []);
 
   function go(next: Step) {
@@ -150,6 +156,7 @@ export default function Home() {
 
   function chooseTopic(nextTopic: Topic) {
     setTopic(nextTopic);
+    setPreview(null);
     setReading(null);
     setError("");
     go("profile");
@@ -169,7 +176,7 @@ export default function Home() {
       if (!response.ok) {
         throw new Error(payload.error || "결과를 생성하지 못했습니다.");
       }
-      setReading(payload as ReadingResponse);
+      setPreview(payload as ReadingPreviewResponse);
       go("preview");
     } catch (caught) {
       setError(
@@ -181,16 +188,106 @@ export default function Home() {
     }
   }
 
-  function applyCoupon() {
-    const isValid = coupon.trim().toUpperCase() === "FIRST20";
-    setCouponApplied(isValid);
-    if (!isValid) setError("쿠폰 코드를 확인해 주세요. 테스트 코드는 FIRST20입니다.");
-    else setError("");
+  async function loadTossPayments() {
+    const existing = (window as typeof window & {
+      TossPayments?: (clientKey: string) => {
+        payment: (options: { customerKey: string }) => {
+          requestPayment: (request: Record<string, unknown>) => Promise<void>;
+        };
+      };
+    }).TossPayments;
+    if (existing) return existing;
+
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://js.tosspayments.com/v2/standard";
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("결제 모듈을 불러오지 못했습니다."));
+      document.head.appendChild(script);
+    });
+    const loaded = (window as typeof window & {
+      TossPayments?: (clientKey: string) => {
+        payment: (options: { customerKey: string }) => {
+          requestPayment: (request: Record<string, unknown>) => Promise<void>;
+        };
+      };
+    }).TossPayments;
+    if (!loaded) throw new Error("결제 모듈을 초기화하지 못했습니다.");
+    return loaded;
   }
 
-  function completeTestCheckout() {
-    go("loading");
-    window.setTimeout(() => go("result"), 2600);
+  async function startCheckout() {
+    if (!preview || paymentBusy) return;
+    setPaymentBusy(true);
+    setError("");
+    try {
+      const input: BirthInput = { ...profile, topic: topic.id };
+      const response = await fetch("/api/payments/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      const order = (await response.json()) as {
+        error?: string;
+        mode: "test" | "toss";
+        clientKey?: string;
+        orderId: string;
+        orderName: string;
+        amount: number;
+        currency: "KRW";
+        readingFingerprint: string;
+      };
+      if (!response.ok) throw new Error(order.error || "결제를 준비하지 못했습니다.");
+
+      sessionStorage.setItem(
+        "myeongun-pending-payment",
+        JSON.stringify({ input, orderId: order.orderId, amount: order.amount }),
+      );
+
+      if (order.mode === "test") {
+        const confirmResponse = await fetch("/api/payments/confirm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            input,
+            orderId: order.orderId,
+            amount: order.amount,
+            test: true,
+          }),
+        });
+        const result = await confirmResponse.json();
+        if (!confirmResponse.ok) {
+          throw new Error(result.error || "테스트 결제를 확인하지 못했습니다.");
+        }
+        setReading(result as ReadingResponse);
+        sessionStorage.removeItem("myeongun-pending-payment");
+        go("result");
+        return;
+      }
+
+      if (!order.clientKey) throw new Error("결제 클라이언트 키가 없습니다.");
+      const TossPayments = await loadTossPayments();
+      const payment = TossPayments(order.clientKey).payment({
+        customerKey: crypto.randomUUID(),
+      });
+      await payment.requestPayment({
+        method: "CARD",
+        amount: { currency: order.currency, value: order.amount },
+        orderId: order.orderId,
+        orderName: order.orderName,
+        customerName: profile.name,
+        metadata: { readingFingerprint: order.readingFingerprint },
+        successUrl: `${window.location.origin}/payment/success`,
+        failUrl: `${window.location.origin}/payment/fail`,
+      });
+    } catch (caught) {
+      setError(
+        caught instanceof Error ? caught.message : "결제 요청 중 오류가 발생했습니다.",
+      );
+    } finally {
+      setPaymentBusy(false);
+    }
   }
 
   function saveResult() {
@@ -218,11 +315,12 @@ export default function Home() {
   function restart() {
     setStep("topics");
     setProfile(initialProfile);
+    setPreview(null);
     setReading(null);
     setError("");
-    setCoupon("");
-    setCouponApplied(false);
     setSaved(false);
+    setPrivacyAgreed(false);
+    setPaymentAgreed(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -249,7 +347,6 @@ export default function Home() {
           <button onClick={() => go("topics")}>무료 사주</button>
           <button onClick={() => go("products")}>상담 상품</button>
           <Link href="/method">해석 방식</Link>
-          <Link href="/admin">관리자</Link>
         </nav>
         <button
           className="menu-button"
@@ -504,6 +601,19 @@ export default function Home() {
                   placeholder="현재 상황, 이미 해본 행동, 가장 알고 싶은 점을 구체적으로 적어주세요."
                 />
               </label>
+              <label className="check-label consent-label">
+                <input
+                  required
+                  type="checkbox"
+                  checked={privacyAgreed}
+                  onChange={(event) => setPrivacyAgreed(event.target.checked)}
+                />
+                <span>
+                  사주 계산을 위한 개인정보 처리와, 운영 설정에 따라 고민 내용이 AI 문장
+                  생성에 사용될 수 있음을 확인했습니다.{" "}
+                  <Link href="/privacy">개인정보처리방침 보기</Link>
+                </span>
+              </label>
               <button className="primary-button" type="submit">
                 무료 원국과 핵심 해석 보기
               </button>
@@ -531,13 +641,11 @@ export default function Home() {
         </section>
       )}
 
-      {step === "preview" && reading && (
+      {step === "preview" && preview && (
         <PreviewResult
-          reading={reading}
+          reading={preview}
           profile={profile}
           topic={topic}
-          saved={saved}
-          onSave={saveResult}
           onProducts={() => go("products")}
         />
       )}
@@ -546,14 +654,14 @@ export default function Home() {
         <section className="product-section">
           <button
             className="back-button"
-            onClick={() => go(reading ? "preview" : "topics")}
+            onClick={() => go(preview ? "preview" : "topics")}
           >
             ← 이전 화면
           </button>
           <div className="section-heading center">
             <span>상세 상담 선택</span>
             <h1>필요한 분석 범위를 선택하세요.</h1>
-            <p>모든 상품은 같은 원국을 바탕으로 하며 분석 기간과 제공 범위가 다릅니다.</p>
+            <p>가격과 제공 범위를 단순하게 유지한 하나의 상세 리포트입니다.</p>
           </div>
           <div className="product-grid">
             {products.map((item) => (
@@ -573,34 +681,36 @@ export default function Home() {
           </div>
           <div className="checkout-card">
             {error && <div className="form-error">{error}</div>}
-            <div className="coupon-area">
-              <label htmlFor="coupon">쿠폰 코드</label>
-              <div>
-                <input
-                  id="coupon"
-                  value={coupon}
-                  onChange={(event) => setCoupon(event.target.value)}
-                  placeholder="FIRST20"
-                />
-                <button onClick={applyCoupon}>적용</button>
-              </div>
-              {couponApplied && <small className="success">첫 상담 20% 쿠폰이 적용됐습니다.</small>}
-            </div>
             <div className="price-summary">
               <span>선택 상품 <strong>{product.name}</strong></span>
-              {discount > 0 && <span>쿠폰 할인 <strong>-{formatPrice(discount)}</strong></span>}
-              <span className="total">결제 금액 <strong>{formatPrice(finalPrice)}</strong></span>
+              <span className="total">결제 금액 <strong>{formatPrice(product.price)}</strong></span>
             </div>
+            <label className="check-label consent-label checkout-consent">
+              <input
+                type="checkbox"
+                checked={paymentAgreed}
+                onChange={(event) => setPaymentAgreed(event.target.checked)}
+              />
+              <span>
+                <Link href="/terms">이용약관</Link>과 상품 가격·제공 범위를 확인했으며,
+                결제 승인 직후 개인화된 디지털 리포트 생성이 시작되는 데 동의합니다.
+              </span>
+            </label>
             <button
               className="kakao-button"
-              onClick={completeTestCheckout}
-              disabled={!reading}
+              onClick={startCheckout}
+              disabled={!preview || paymentBusy || !paymentAgreed}
             >
-              <span>TEST</span>
-              {reading ? "테스트 결제로 상세 결과 열기" : "먼저 무료 원국을 계산해 주세요"}
+              <span>PAY</span>
+              {paymentBusy
+                ? "결제를 준비하고 있습니다"
+                : preview
+                  ? `${formatPrice(product.price)} 결제하고 상세 결과 보기`
+                  : "먼저 무료 원국을 계산해 주세요"}
             </button>
             <p className="demo-notice">
-              현재는 결제 검증 단계입니다. 실제 과금은 발생하지 않으며 운영 전 PG 계약과 카카오 로그인을 연결해야 합니다.
+              로컬 개발 환경에서는 테스트 결제로 동작합니다. 운영 환경에서는 토스페이먼츠 키가
+              설정된 경우에만 결제창이 열리며, 서버 승인 전에는 상세 결과를 제공하지 않습니다.
             </p>
             <div className="ai-disclosure">
               사주 원국과 오행·대운 계산은 역법 엔진이 수행합니다. AI는 계산된 근거를 상담 문장으로 정리하는 역할만 하며,
@@ -634,7 +744,6 @@ export default function Home() {
           <Link href="/method">사주 해석 방식</Link>
           <Link href="/terms">이용약관</Link>
           <Link href="/privacy">개인정보처리방침</Link>
-          <Link href="/admin">관리자</Link>
         </div>
         <p className="copyright">© 2026 Myeongun Library. 결과는 참고용 해석입니다.</p>
       </footer>
@@ -646,15 +755,11 @@ function PreviewResult({
   reading,
   profile,
   topic,
-  saved,
-  onSave,
   onProducts,
 }: {
-  reading: ReadingResponse;
+  reading: ReadingPreviewResponse;
   profile: Omit<BirthInput, "topic">;
   topic: Topic;
-  saved: boolean;
-  onSave: () => void;
   onProducts: () => void;
 }) {
   return (
@@ -665,27 +770,27 @@ function PreviewResult({
           <h1>{profile.name}님의 지금 흐름</h1>
           <p>
             {topic.teacher} 선생 · {topic.eyebrow} ·{" "}
-            {reading.interpretationSource === "openai-assisted" ? "AI 보조 해석" : "규칙 기반 해석"}
+            규칙 기반 무료 해석
           </p>
         </div>
         <div className="score-ring">
-          <strong>{reading.report.score}</strong>
-          <span>{reading.report.scoreLabel}</span>
+          <strong>{reading.preview.score}</strong>
+          <span>{reading.preview.scoreLabel}</span>
         </div>
       </div>
 
       <ChartSummary reading={reading} />
 
       <div className="keyword-row">
-        {reading.report.keywords.map((keyword) => (
+        {reading.preview.keywords.map((keyword) => (
           <span key={keyword}>#{keyword}</span>
         ))}
       </div>
       <article className="reading-card lead-reading">
-        <small>{reading.report.sections.nature.title}</small>
-        <h2>{reading.report.summary}</h2>
-        <p>{reading.report.preview}</p>
-        <Evidence items={reading.report.sections.nature.evidence} />
+        <small>{reading.preview.nature.title}</small>
+        <h2>{reading.preview.summary}</h2>
+        <p>{reading.preview.preview}</p>
+        <Evidence items={reading.preview.nature.evidence} />
       </article>
 
       <div className="locked-reading">
@@ -706,19 +811,24 @@ function PreviewResult({
 
       <div className="action-quote">
         <small>핵심 한 문장</small>
-        <blockquote>{reading.report.coreMessage}</blockquote>
+        <blockquote>{reading.preview.coreMessage}</blockquote>
       </div>
       <button className="primary-button wide" onClick={onProducts}>
         상세 상담 범위 비교하기
       </button>
-      <button className="text-button" onClick={onSave}>
-        {saved ? "이 기기에 저장되었습니다 ✓" : "무료 결과를 이 기기에 저장하기"}
-      </button>
+      <p className="demo-notice">
+        무료 응답에는 이 화면에 표시된 원국과 핵심 해석만 포함되며, 상세 본문은 결제 승인 후
+        서버에서 새로 생성됩니다.
+      </p>
     </section>
   );
 }
 
-function ChartSummary({ reading }: { reading: ReadingResponse }) {
+function ChartSummary({
+  reading,
+}: {
+  reading: ReadingResponse | ReadingPreviewResponse;
+}) {
   return (
     <div className="chart-summary">
       <div className="pillars-card">
@@ -801,7 +911,7 @@ function PaidResult({
       rating: Number(data.get("rating")),
       content: data.get("content"),
       createdAt: new Date().toISOString(),
-      verified: true,
+      verified: reading.payment?.mode === "toss",
     });
     localStorage.setItem("myeongun-reviews", JSON.stringify(previous.slice(0, 50)));
     setReviewDone(true);
@@ -906,7 +1016,13 @@ function PaidResult({
         <button onClick={() => setReviewOpen(true)}>구매 후기 남기기</button>
         <button onClick={onRestart}>다른 고민 보기</button>
       </div>
-      {reviewDone && <div className="toast">구매 인증 후기가 등록됐습니다.</div>}
+      {reviewDone && (
+        <div className="toast">
+          {reading.payment?.mode === "toss"
+            ? "구매 인증 후기가 등록됐습니다."
+            : "테스트 후기가 이 기기에 저장됐습니다."}
+        </div>
+      )}
 
       {reviewOpen && (
         <div className="modal-backdrop" onClick={() => setReviewOpen(false)}>
@@ -916,7 +1032,9 @@ function PaidResult({
             onClick={(event) => event.stopPropagation()}
           >
             <button type="button" className="modal-close" onClick={() => setReviewOpen(false)}>×</button>
-            <p className="kicker">구매 인증 후기</p>
+            <p className="kicker">
+              {reading.payment?.mode === "toss" ? "구매 인증 후기" : "로컬 테스트 후기"}
+            </p>
             <h2>해석이 어떠셨나요?</h2>
             <label>
               만족도
