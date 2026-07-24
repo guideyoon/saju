@@ -172,6 +172,7 @@ export async function enhanceReportWithOpenAI({
         baselineReport: fallback,
       }),
     }),
+    signal: AbortSignal.timeout(25_000),
   });
 
   if (!response.ok) {

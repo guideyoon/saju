@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { hasPersistenceConfiguration } from "../../lib/storage/supabase";
 
 export default function TermsPage() {
   const operator = {
@@ -10,6 +11,7 @@ export default function TermsPage() {
     phone: process.env.SERVICE_SUPPORT_PHONE,
   };
   const hasOperatorInfo = Object.values(operator).every(Boolean);
+  const persistenceEnabled = hasPersistenceConfiguration();
 
   return (
     <main className="content-shell">
@@ -57,6 +59,11 @@ export default function TermsPage() {
           설계되어 있습니다. 결제 인증만으로 구매가 완료되는 것은 아니며 서버의 금액·주문번호
           검증과 최종 승인이 끝난 뒤 상세 결과를 제공합니다. 로컬 개발 환경의 테스트 결제에는
           실제 과금이 발생하지 않습니다.
+        </p>
+        <p>
+          운영 결제는 사업자 정보, 결제 키, 암호화 저장소가 모두 설정된 경우에만
+          활성화됩니다. 현재 서버 저장 상태:{" "}
+          {persistenceEnabled ? "암호화 보관 설정 완료" : "미설정 · 운영 결제 차단"}.
         </p>
         <h2>5. 실제 유료 출시 전 확정 사항</h2>
         <p>

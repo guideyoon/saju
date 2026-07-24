@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { BirthInput, ReadingResponse } from "../../../lib/saju/types";
+import { getAccessToken } from "../../../lib/auth/client";
 
 type PendingPayment = {
   input: BirthInput;
@@ -33,6 +34,7 @@ export default function PaymentSuccessPage() {
           throw new Error("결제 요청 금액과 승인 금액이 일치하지 않습니다.");
         }
 
+        const authToken = await getAccessToken();
         const response = await fetch("/api/payments/confirm", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -41,6 +43,7 @@ export default function PaymentSuccessPage() {
             paymentKey,
             orderId,
             amount,
+            authToken,
           }),
         });
         const payload = await response.json();

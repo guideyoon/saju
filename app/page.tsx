@@ -8,6 +8,8 @@ import type {
   ReadingResponse,
   TopicId,
 } from "../lib/saju/types";
+import { getAccessToken } from "../lib/auth/client";
+import AuthButton from "./components/auth-button";
 
 type Topic = {
   id: TopicId;
@@ -246,6 +248,7 @@ export default function Home() {
       );
 
       if (order.mode === "test") {
+        const authToken = await getAccessToken();
         const confirmResponse = await fetch("/api/payments/confirm", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -254,6 +257,7 @@ export default function Home() {
             orderId: order.orderId,
             amount: order.amount,
             test: true,
+            authToken,
           }),
         });
         const result = await confirmResponse.json();
@@ -347,6 +351,8 @@ export default function Home() {
           <button onClick={() => go("topics")}>무료 사주</button>
           <button onClick={() => go("products")}>상담 상품</button>
           <Link href="/method">해석 방식</Link>
+          <Link href="/recover">결과 복구</Link>
+          <AuthButton />
         </nav>
         <button
           className="menu-button"
@@ -744,6 +750,8 @@ export default function Home() {
           <Link href="/method">사주 해석 방식</Link>
           <Link href="/terms">이용약관</Link>
           <Link href="/privacy">개인정보처리방침</Link>
+          <Link href="/recover">구매 결과 복구</Link>
+          <Link href="/account">내 서재</Link>
         </div>
         <p className="copyright">© 2026 Myeongun Library. 결과는 참고용 해석입니다.</p>
       </footer>
@@ -897,6 +905,7 @@ function PaidResult({
 }) {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewDone, setReviewDone] = useState(false);
+  const [recoveryCopied, setRecoveryCopied] = useState(false);
   const report = reading.report;
   const sections = Object.values(report.sections);
 
@@ -1009,6 +1018,36 @@ function PaidResult({
         <ul>{reading.chart.calculationNotes.map((note) => <li key={note}>{note}</li>)}</ul>
         <p>생성 방식: {reading.interpretationSource === "openai-assisted" ? `AI 보조 (${reading.model})` : "규칙 기반 해석 엔진"}</p>
       </details>
+
+      {reading.payment?.recoveryToken && (
+        <details className="recovery-card">
+          <summary>다른 기기에서 결과를 복구하려면</summary>
+          <p>
+            아래 주문번호와 복구 코드를 안전한 곳에 보관하세요. 복구 코드는 서버에 원문으로
+            저장되지 않으며 다시 표시할 수 없습니다.
+          </p>
+          <dl>
+            <div>
+              <dt>주문번호</dt>
+              <dd>{reading.payment.orderId}</dd>
+            </div>
+            <div>
+              <dt>복구 코드</dt>
+              <dd>{reading.payment.recoveryToken}</dd>
+            </div>
+          </dl>
+          <button
+            onClick={async () => {
+              await navigator.clipboard.writeText(
+                `명운서재 주문번호: ${reading.payment?.orderId}\n복구 코드: ${reading.payment?.recoveryToken}`,
+              );
+              setRecoveryCopied(true);
+            }}
+          >
+            {recoveryCopied ? "복구 정보 복사 완료 ✓" : "복구 정보 복사하기"}
+          </button>
+        </details>
+      )}
 
       <div className="result-actions">
         <button onClick={() => window.print()}>PDF로 저장</button>

@@ -121,6 +121,7 @@ export interface ReadingResponse {
     method: string;
     approvedAt: string;
     mode: "test" | "toss";
+    recoveryToken?: string;
   };
 }
 

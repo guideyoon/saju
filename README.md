@@ -23,6 +23,13 @@ npm run dev -- --hostname 127.0.0.1 --port 3000
 - `OPENAI_API_KEY`: 선택 사항. 계산된 명리 데이터를 문장으로 다듬는 데만 사용
 - `OPENAI_MODEL`: 기본값 `gpt-5.6-terra`
 - `PAYMENT_TEST_MODE`: 운영에서는 반드시 `false`
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`: 서버 전용 결제·결과 저장소
+- `READING_ENCRYPTION_KEY`: 상세 결과 암호화용 32바이트 Base64 키
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: 브라우저의
+  선택적 카카오 로그인
+
+`SUPABASE_SERVICE_ROLE_KEY`는 RLS를 우회할 수 있으므로 서버 환경 변수에만 저장해야
+합니다. 브라우저 코드에 넣지 마세요.
 
 ## 결제·결과 제공 경계
 
@@ -31,10 +38,27 @@ npm run dev -- --hostname 127.0.0.1 --port 3000
 3. 토스페이먼츠 인증 후 `/api/payments/confirm`이 주문번호·금액·승인 상태를
    서버에서 검증합니다.
 4. 승인이 완료된 요청에만 전체 리포트를 생성해 반환합니다.
+5. 운영 결제 결과는 AES-256-GCM으로 암호화한 뒤 Supabase에 저장하고, 복구 코드는
+   해시만 보관합니다.
 
-현재 구매 결과는 사용자가 선택한 경우 브라우저 저장소에 보관됩니다. 다기기
-영구 보관, 계정 복구, 환불 자동화에는 별도 회원 시스템과 데이터베이스 연결이
-필요합니다.
+## Supabase 준비
+
+Supabase SQL Editor 또는 CLI로 아래 마이그레이션을 적용합니다.
+
+```text
+supabase/migrations/202607240001_create_myeongun_orders.sql
+```
+
+테이블은 RLS를 활성화하고 `anon`, `authenticated` 역할의 직접 접근을 철회합니다.
+서버의 결제 승인·복구 API만 서비스 역할 키로 접근합니다. 환경 변수가 하나라도
+빠지면 운영 결제는 503으로 차단됩니다.
+
+## 카카오 로그인
+
+Supabase Authentication의 Kakao 공급자를 활성화하고 Kakao Developers에서 발급한
+REST API 키와 Client Secret을 Supabase Dashboard에 등록합니다. 리다이렉트 허용
+목록에는 운영 도메인의 `/auth/callback`을 추가합니다. 로그인은 선택 사항이며,
+로그인하지 않은 구매자는 주문번호와 복구 코드로 결과를 다시 열 수 있습니다.
 
 ## 검증
 

@@ -49,6 +49,15 @@ a { color: inherit; text-decoration: none; }
 .brand small { display: block; margin-top: 2px; color: var(--muted); font-size: 8px; letter-spacing: .16em; }
 .nav { display: flex; align-items: center; gap: 30px; font-size: 13px; font-weight: 600; }
 .nav button { padding: 8px 0; border: 0; background: none; cursor: pointer; }
+.nav .auth-button {
+  padding: 8px 13px;
+  border: 1px solid rgba(23, 59, 54, 0.25);
+  border-radius: 999px;
+  background: white;
+  color: var(--green);
+}
+.auth-actions { display: inline-flex; align-items: center; gap: 8px; }
+.auth-actions > a { color: var(--green); }
 .nav a:hover, .nav button:hover { color: var(--red); }
 .menu-button { display: none; border: 0; background: none; font-size: 13px; }
 .progress-wrap { height: 2px; background: #ebe4d7; }
@@ -610,6 +619,85 @@ footer { padding: 55px clamp(24px, 7vw, 110px); display: grid; grid-template-col
   border: 1px solid var(--line);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.65);
+}
+
+.recovery-page { max-width: 760px; }
+.recovery-form { margin-top: 30px; }
+
+.recovery-card {
+  margin-top: 28px;
+  padding: 22px;
+  border: 1px solid rgba(23, 59, 54, 0.2);
+  border-radius: 16px;
+  background: rgba(225, 238, 230, 0.55);
+}
+
+.recovery-card summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--green);
+}
+
+.recovery-card p {
+  margin: 14px 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.recovery-card dl { display: grid; gap: 10px; }
+.recovery-card dl > div {
+  padding: 12px;
+  border-radius: 10px;
+  background: white;
+}
+.recovery-card dt { font-size: 0.75rem; color: var(--muted); }
+.recovery-card dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.82rem;
+}
+.recovery-card button {
+  margin-top: 14px;
+  padding: 11px 15px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--green);
+  color: white;
+  cursor: pointer;
+}
+
+.account-page { max-width: 900px; }
+.account-login { width: auto; margin: 18px 0 30px; }
+.account-reading-list { display: grid; gap: 12px; margin-top: 30px; }
+.account-reading-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+}
+.account-reading-list article div { display: grid; gap: 5px; }
+.account-reading-list small, .account-reading-list span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.account-reading-list strong {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.88rem;
+}
+.account-reading-list button {
+  flex: 0 0 auto;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--green);
+  color: white;
+  cursor: pointer;
 }
 
 @media (max-width: 600px) {
