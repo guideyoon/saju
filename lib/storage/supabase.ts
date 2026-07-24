@@ -16,6 +16,7 @@ type StoredRow = {
   user_id?: string | null;
   payment_key_hash: string;
   amount: number;
+  status: "DONE" | "CANCELED" | "PARTIAL_CANCELED";
   method: string;
   approved_at: string;
   reading_fingerprint: string;
@@ -49,7 +50,11 @@ export function hasPersistenceConfiguration() {
   );
 }
 
-async function databaseRequest(path: string, init: RequestInit = {}) {
+async function databaseRequest(
+  path: string,
+  init: RequestInit = {},
+  timeoutMs = 10_000,
+) {
   const { url, serviceKey } = configuration();
   const response = await fetch(`${url}/rest/v1/${path}`, {
     ...init,
@@ -59,7 +64,7 @@ async function databaseRequest(path: string, init: RequestInit = {}) {
       "Content-Type": "application/json",
       ...init.headers,
     },
-    signal: AbortSignal.timeout(10_000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!response.ok) {
     throw new Error(`Reading database request failed: ${response.status}`);
@@ -95,7 +100,7 @@ export async function findReadingByPayment({
 }) {
   if (!hasPersistenceConfiguration()) return null;
   const rows = await findRows(
-    `order_id=eq.${encodeURIComponent(orderId)}&payment_key_hash=eq.${secretHash(paymentKey)}`,
+    `order_id=eq.${encodeURIComponent(orderId)}&payment_key_hash=eq.${secretHash(paymentKey)}&status=eq.DONE`,
   );
   const row = rows[0];
   if (!row || row.reading_fingerprint !== fingerprint) return null;
@@ -126,7 +131,7 @@ export async function findReadingByRecovery({
 }) {
   if (!hasPersistenceConfiguration()) return null;
   const rows = await findRows(
-    `order_id=eq.${encodeURIComponent(orderId)}&recovery_token_hash=eq.${secretHash(recoveryToken)}`,
+    `order_id=eq.${encodeURIComponent(orderId)}&recovery_token_hash=eq.${secretHash(recoveryToken)}&status=eq.DONE`,
   );
   return rows[0] ? decodeRow(rows[0]) : null;
 }
@@ -134,7 +139,7 @@ export async function findReadingByRecovery({
 export async function listUserReadings(userId: string) {
   if (!hasPersistenceConfiguration()) return [];
   const response = await databaseRequest(
-    `myeongun_orders?select=order_id,amount,method,approved_at&user_id=eq.${encodeURIComponent(userId)}&order=approved_at.desc&limit=50`,
+    `myeongun_orders?select=order_id,amount,method,approved_at&user_id=eq.${encodeURIComponent(userId)}&status=eq.DONE&order=approved_at.desc&limit=50`,
   );
   const rows = (await response.json()) as Array<
     Pick<StoredRow, "order_id" | "amount" | "method" | "approved_at">
@@ -158,9 +163,36 @@ export async function findReadingForUser({
 }) {
   if (!hasPersistenceConfiguration()) return null;
   const rows = await findRows(
-    `order_id=eq.${encodeURIComponent(orderId)}&user_id=eq.${encodeURIComponent(userId)}`,
+    `order_id=eq.${encodeURIComponent(orderId)}&user_id=eq.${encodeURIComponent(userId)}&status=eq.DONE`,
   );
   return rows[0] ? decodeRow(rows[0]) : null;
+}
+
+export async function updatePaymentStatus({
+  orderId,
+  paymentKey,
+  amount,
+  status,
+}: {
+  orderId: string;
+  paymentKey: string;
+  amount: number;
+  status: "DONE" | "CANCELED" | "PARTIAL_CANCELED";
+}) {
+  const response = await databaseRequest(
+    `myeongun_orders?order_id=eq.${encodeURIComponent(orderId)}&payment_key_hash=eq.${secretHash(paymentKey)}&amount=eq.${amount}`,
+    {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        status,
+        updated_at: new Date().toISOString(),
+      }),
+    },
+    2_000,
+  );
+  const rows = (await response.json()) as Array<Pick<StoredRow, "order_id">>;
+  return rows.length > 0;
 }
 
 export async function storePaidReading({

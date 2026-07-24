@@ -5,6 +5,7 @@ import { POST as recoverReading } from "../readings/recover/route";
 import { GET as getHealth } from "../health/route";
 import { POST as confirmPayment } from "./confirm/route";
 import { POST as preparePayment } from "./prepare/route";
+import { POST as receiveTossWebhook } from "../webhooks/toss/route";
 
 const input = {
   name: "홍길동",
@@ -132,6 +133,71 @@ describe("reading and payment boundary", () => {
       expect(recovery.status).toBe(503);
       expect(account.status).toBe(503);
     } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("re-queries Toss before accepting a payment status webhook", async () => {
+    vi.stubEnv("TOSS_SECRET_KEY", "test_sk_authoritative_lookup");
+    vi.stubEnv("SUPABASE_URL", "https://project.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
+    vi.stubEnv(
+      "READING_ENCRYPTION_KEY",
+      Buffer.alloc(32, 7).toString("base64"),
+    );
+    const orderId = "MYEONGUN-6ba7b810-9dad-41d1-80b4-00c04fd430c8";
+    const paymentKey = "payment-key-from-toss";
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            paymentKey,
+            orderId,
+            totalAmount: 14900,
+            status: "CANCELED",
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([{ order_id: orderId }]), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+
+    try {
+      const response = await receiveTossWebhook(
+        new Request("http://localhost/api/webhooks/toss", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            eventType: "PAYMENT_STATUS_CHANGED",
+            data: {
+              paymentKey,
+              orderId,
+              status: "DONE",
+            },
+          }),
+        }),
+      );
+      const payload = await response.json();
+
+      expect(response.status).toBe(200);
+      expect(payload).toEqual({ received: true, updated: true });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(fetchMock.mock.calls[0]?.[0]).toContain(
+        encodeURIComponent(paymentKey),
+      );
+      expect(fetchMock.mock.calls[1]?.[1]).toMatchObject({
+        method: "PATCH",
+      });
+      expect(fetchMock.mock.calls[1]?.[1]?.body).toContain(
+        '"status":"CANCELED"',
+      );
+    } finally {
+      fetchMock.mockRestore();
       vi.unstubAllEnvs();
     }
   });
