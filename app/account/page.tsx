@@ -95,7 +95,11 @@ export default function AccountPage() {
       <section className="content-page account-page">
         <p className="kicker">내 명운서재</p>
         <h1>계정에 보관된<br />상세 리포트</h1>
-        {status && <p className="content-lead">{status}</p>}
+        {status && (
+          <p className="content-lead" role="status" aria-live="polite">
+            {status}
+          </p>
+        )}
         {!readings.length && (
           <button className="primary-button account-login" onClick={signIn}>
             카카오 로그인

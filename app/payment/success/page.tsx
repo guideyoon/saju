@@ -79,10 +79,14 @@ export default function PaymentSuccessPage() {
 
   return (
     <main className="content-shell">
-      <section className="legal-page payment-status-page">
+      <section
+        className="legal-page payment-status-page"
+        aria-live="polite"
+        aria-busy={!error}
+      >
         <p className="kicker">결제 승인</p>
         <h1>{error ? "결제를 확인하지 못했습니다" : "잠시만 기다려 주세요"}</h1>
-        <p>{error || status}</p>
+        <p role={error ? "alert" : "status"}>{error || status}</p>
         {error && (
           <div className="result-actions">
             <Link href="/">처음 화면으로 돌아가기</Link>

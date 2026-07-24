@@ -64,8 +64,12 @@ export default function RecoverPage() {
           복구 코드는 결제 완료 화면에서 한 번 제공됩니다. 서버에는 코드 원문이 아닌
           단방향 해시만 저장됩니다.
         </p>
-        <form className="profile-form recovery-form" onSubmit={recover}>
-          {error && <div className="form-error">{error}</div>}
+        <form
+          className="profile-form recovery-form"
+          onSubmit={recover}
+          aria-busy={loading}
+        >
+          {error && <div className="form-error" role="alert">{error}</div>}
           <label>
             <span>주문번호</span>
             <input

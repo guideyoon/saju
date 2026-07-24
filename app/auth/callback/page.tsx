@@ -28,10 +28,16 @@ export default function AuthCallbackPage() {
 
   return (
     <main className="content-shell">
-      <section className="legal-page payment-status-page">
+      <section
+        className="legal-page payment-status-page"
+        aria-live="polite"
+        aria-busy={!error}
+      >
         <p className="kicker">카카오 로그인</p>
         <h1>{error ? "로그인을 완료하지 못했습니다" : "로그인을 확인하고 있습니다"}</h1>
-        <p>{error || "인증이 끝나면 서비스 화면으로 돌아갑니다."}</p>
+        <p role={error ? "alert" : "status"}>
+          {error || "인증이 끝나면 서비스 화면으로 돌아갑니다."}
+        </p>
         {error && <Link href="/">처음 화면으로 돌아가기</Link>}
       </section>
     </main>

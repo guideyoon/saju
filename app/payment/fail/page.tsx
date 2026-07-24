@@ -28,7 +28,7 @@ export default function PaymentFailPage() {
       <section className="legal-page payment-status-page">
         <p className="kicker">결제 미완료</p>
         <h1>결제가 진행되지 않았습니다</h1>
-        <p>{message}</p>
+        <p role="status" aria-live="polite">{message}</p>
         <p>승인되지 않은 결제에는 상세 리포트가 생성되지 않습니다.</p>
         <div className="result-actions">
           <Link href="/">무료 결과로 돌아가기</Link>

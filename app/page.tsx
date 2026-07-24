@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import type {
   BirthInput,
   ReadingPreviewResponse,
@@ -126,6 +126,15 @@ export default function Home() {
   }, [step]);
 
   useEffect(() => {
+    if (!menuOpen) return;
+    function closeMenu(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+    window.addEventListener("keydown", closeMenu);
+    return () => window.removeEventListener("keydown", closeMenu);
+  }, [menuOpen]);
+
+  useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     }
@@ -152,8 +161,16 @@ export default function Home() {
   }, []);
 
   function go(next: Step) {
+    setMenuOpen(false);
     setStep(next);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function scrollToTopics() {
+    setMenuOpen(false);
+    document
+      .getElementById("topic-choices")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function chooseTopic(nextTopic: Topic) {
@@ -347,17 +364,23 @@ export default function Home() {
             <small>MYEONGUN LIBRARY</small>
           </span>
         </button>
-        <nav className={menuOpen ? "nav open" : "nav"}>
+        <nav
+          id="primary-navigation"
+          className={menuOpen ? "nav open" : "nav"}
+          aria-label="주요 메뉴"
+        >
           <button onClick={() => go("topics")}>무료 사주</button>
           <button onClick={() => go("products")}>상담 상품</button>
-          <Link href="/method">해석 방식</Link>
-          <Link href="/recover">결과 복구</Link>
-          <AuthButton />
+          <Link href="/method" onClick={() => setMenuOpen(false)}>해석 방식</Link>
+          <Link href="/recover" onClick={() => setMenuOpen(false)}>결과 복구</Link>
+          <AuthButton onAction={() => setMenuOpen(false)} />
         </nav>
         <button
           className="menu-button"
           onClick={() => setMenuOpen((value) => !value)}
-          aria-label="메뉴 열기"
+          aria-expanded={menuOpen}
+          aria-controls="primary-navigation"
+          aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
         >
           {menuOpen ? "닫기" : "메뉴"}
         </button>
@@ -380,6 +403,9 @@ export default function Home() {
                 생년월일시로 사주 원국과 오행·십성·대운을 계산하고,
                 지금의 고민에 연결해 앞으로 6개월의 행동 방향을 안내합니다.
               </p>
+              <button className="primary-button hero-cta" onClick={scrollToTopics}>
+                무료 원국 계산 시작하기
+              </button>
               <div className="trust-row">
                 <span>로그인 없이 시작</span>
                 <span>계산 근거 공개</span>
@@ -393,7 +419,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="topic-section">
+          <section className="topic-section" id="topic-choices">
             <div className="section-heading">
               <span>01 · 고민 선택</span>
               <h2>지금 가장 알고 싶은 것을 골라주세요.</h2>
@@ -468,7 +494,7 @@ export default function Home() {
               </div>
             </div>
             <form className="profile-form" onSubmit={submitProfile}>
-              {error && <div className="form-error">{error}</div>}
+              {error && <div className="form-error" role="alert">{error}</div>}
               <label>
                 <span>이름 또는 닉네임</span>
                 <input
@@ -629,7 +655,7 @@ export default function Home() {
       )}
 
       {step === "loading" && (
-        <section className="loading-section">
+        <section className="loading-section" aria-live="polite" aria-busy="true">
           <div className="orbit">
             <span>木</span><span>火</span><span>土</span><span>金</span><span>水</span>
             <strong>命</strong>
@@ -686,7 +712,7 @@ export default function Home() {
             ))}
           </div>
           <div className="checkout-card">
-            {error && <div className="form-error">{error}</div>}
+            {error && <div className="form-error" role="alert">{error}</div>}
             <div className="price-summary">
               <span>선택 상품 <strong>{product.name}</strong></span>
               <span className="total">결제 금액 <strong>{formatPrice(product.price)}</strong></span>
@@ -906,8 +932,54 @@ function PaidResult({
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewDone, setReviewDone] = useState(false);
   const [recoveryCopied, setRecoveryCopied] = useState(false);
+  const reviewModalRef = useRef<HTMLFormElement>(null);
   const report = reading.report;
   const sections = Object.values(report.sections);
+
+  useEffect(() => {
+    if (!reviewOpen) return;
+    const previousFocus =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const modal = reviewModalRef.current;
+    modal
+      ?.querySelector<HTMLElement>("select, textarea, button")
+      ?.focus();
+
+    function handleModalKeydown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setReviewOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !modal) return;
+      const focusable = Array.from(
+        modal.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    window.addEventListener("keydown", handleModalKeydown);
+    return () => {
+      window.removeEventListener("keydown", handleModalKeydown);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [reviewOpen]);
 
   function submitReview(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -1056,7 +1128,7 @@ function PaidResult({
         <button onClick={onRestart}>다른 고민 보기</button>
       </div>
       {reviewDone && (
-        <div className="toast">
+        <div className="toast" role="status" aria-live="polite">
           {reading.payment?.mode === "toss"
             ? "구매 인증 후기가 등록됐습니다."
             : "테스트 후기가 이 기기에 저장됐습니다."}
@@ -1067,14 +1139,25 @@ function PaidResult({
         <div className="modal-backdrop" onClick={() => setReviewOpen(false)}>
           <form
             className="review-modal"
+            ref={reviewModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-modal-title"
             onSubmit={submitReview}
             onClick={(event) => event.stopPropagation()}
           >
-            <button type="button" className="modal-close" onClick={() => setReviewOpen(false)}>×</button>
+            <button
+              type="button"
+              className="modal-close"
+              aria-label="후기 작성 창 닫기"
+              onClick={() => setReviewOpen(false)}
+            >
+              ×
+            </button>
             <p className="kicker">
               {reading.payment?.mode === "toss" ? "구매 인증 후기" : "로컬 테스트 후기"}
             </p>
-            <h2>해석이 어떠셨나요?</h2>
+            <h2 id="review-modal-title">해석이 어떠셨나요?</h2>
             <label>
               만족도
               <select name="rating" defaultValue="5">

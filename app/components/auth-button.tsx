@@ -8,7 +8,7 @@ import {
   isClientAuthConfigured,
 } from "../../lib/auth/client";
 
-export default function AuthButton() {
+export default function AuthButton({ onAction }: { onAction?: () => void }) {
   const [user, setUser] = useState<User | null>(null);
   const [busy, setBusy] = useState(false);
   const configured = isClientAuthConfigured();
@@ -30,6 +30,7 @@ export default function AuthButton() {
   async function toggleAuth() {
     const supabase = getSupabaseBrowserClient();
     if (!supabase || busy) return;
+    onAction?.();
     setBusy(true);
     if (user) {
       await supabase.auth.signOut();
@@ -55,7 +56,9 @@ export default function AuthButton() {
 
   return user ? (
     <span className="auth-actions">
-      <Link href="/account">{nickname || "내 서재"}</Link>
+      <Link href="/account" onClick={onAction}>
+        {nickname || "내 서재"}
+      </Link>
       <button className="auth-button" onClick={toggleAuth} disabled={busy}>
         {busy ? "처리 중" : "로그아웃"}
       </button>
